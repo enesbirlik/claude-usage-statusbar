@@ -4,7 +4,7 @@ const os = require('os');
 const path = require('path');
 
 const CRED = os.homedir() + '/.claude/.credentials.json';
-// tüm VS Code pencereleri aynı sonucu paylaşır, endpoint'e TTL'de en fazla bir kez gidilir (yoksa 429)
+// all VS Code windows share one result; the endpoint is hit at most once per TTL (otherwise 429)
 const CACHE = path.join(os.tmpdir(), 'claude-usage-cache.json');
 const TTL = 5 * 60 * 1000;
 const fmt = iso => new Date(iso).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
@@ -13,7 +13,7 @@ const readCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')
 const writeCache = c => { try { fs.writeFileSync(CACHE, JSON.stringify(c)); } catch {} };
 
 async function fetchUsage() {
-  // token Claude Code'un kendi girişi; süresi dolunca Claude Code yeniler, biz her seferinde tekrar okuyoruz
+  // Claude Code's own login token; Claude Code refreshes it on expiry, so re-read it every time
   const token = JSON.parse(fs.readFileSync(CRED, 'utf8')).claudeAiOauth.accessToken;
   const r = await fetch('https://api.anthropic.com/api/oauth/usage', {
     headers: { Authorization: 'Bearer ' + token, 'anthropic-beta': 'oauth-2025-04-20' },
@@ -42,23 +42,23 @@ function activate(ctx) {
       `Weekly: ${w.utilization}%, resets ${fmt(w.resets_at)}\n` +
       `Updated: ${fmt(c.okAt)}${note}\nClick to refresh`;
     const max = Math.max(s.utilization, w.utilization);
-    // soluk yazı rengi, arka plan boyanmaz
+    // muted text color, no background
     item.color = max >= 90 ? '#c08a8a' : max >= 75 ? '#bfae7f' : undefined;
   }
 
   async function refresh(force) {
     const c = readCache();
-    // hata üst üste gelirse bekleme katlanır: 5, 10, 20, 30 dk
+    // back off on repeated errors: 5, 10, 20, 30 min
     const wait = Math.min(TTL * 2 ** (c.fails || 0), 30 * 60 * 1000);
     if (!force && c.at && Date.now() - c.at < wait) return render(c);
-    writeCache({ ...c, at: Date.now() }); // diğer pencereler bu arada sormasın
+    writeCache({ ...c, at: Date.now() }); // keep other windows from fetching meanwhile
     try {
       const u = await fetchUsage();
       const n = { at: Date.now(), okAt: new Date().toISOString(), u };
       writeCache(n);
       render(n);
     } catch (e) {
-      // hata olursa son iyi değer kalır
+      // keep the last good value on error
       const n = { ...c, at: Date.now(), err: e.message, fails: (c.fails || 0) + 1 };
       writeCache(n);
       render(n);
@@ -67,7 +67,7 @@ function activate(ctx) {
 
   ctx.subscriptions.push(item, vscode.commands.registerCommand('claudeUsage.refresh', () => refresh(true)));
   refresh(false);
-  const t = setInterval(() => refresh(false), 60 * 1000); // dakikada bir önbelleğe bakar, ağa TTL'de bir çıkar
+  const t = setInterval(() => refresh(false), 60 * 1000); // check the cache every minute, hit the network once per TTL
   ctx.subscriptions.push({ dispose: () => clearInterval(t) });
 }
 
