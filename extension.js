@@ -49,8 +49,10 @@ function activate(ctx) {
   async function refresh(force) {
     const c = readCache();
     // back off on repeated errors: 5, 10, 20, 30 min
-    const wait = Math.min(TTL * 2 ** (c.fails || 0), 30 * 60 * 1000);
-    if (!force && c.at && Date.now() - c.at < wait) return render(c);
+    const backoff = Math.min(TTL * 2 ** (c.fails || 0), 30 * 60 * 1000);
+    // a click skips the TTL but not the error backoff, and at most once a minute (spam-clicking = 429)
+    const wait = force && !c.fails ? 60 * 1000 : backoff;
+    if (c.at && Date.now() - c.at < wait) return render(c);
     writeCache({ ...c, at: Date.now() }); // keep other windows from fetching meanwhile
     try {
       const u = await fetchUsage();
