@@ -1,24 +1,25 @@
 # Claude Usage Status Bar
 
-VS Code'un alt çubuğunda (status bar) Claude Code plan kullanımını gösterir:
+Shows your Claude Code plan usage in the VS Code status bar:
 
 ```
 ✨ 5s 4% · 7g 82%
 ```
 
-- **5s:** 5 saatlik oturum limiti, **7g:** haftalık limit
-- Üstüne gelince sıfırlanma saatleri, tıklayınca yenileme
-- 5 dakikada bir yenilenir; açık tüm VS Code pencereleri sonucu paylaşır (tek istek), hata gelirse son değer kalır ve bekleme 30 dk’ya kadar uzar
-- %75 üstü soluk sarı, %90 üstü soluk kırmızı yazı
+- **5s:** 5-hour session limit, **7g:** weekly limit
+- Hover for reset times, click to refresh
+- Refreshes every 5 minutes; all open VS Code windows share one result (a single request), so the endpoint isn't hit once per window
+- On errors the last good value stays visible and the retry interval backs off up to 30 minutes
+- Text turns muted yellow above 75% and muted red above 90%
 
-## Gereksinim
+## Requirements
 
-- Claude Code'a Claude hesabıyla (Pro/Max) giriş yapılmış olmalı. Eklenti `~/.claude/.credentials.json` içindeki token'ı okur ve yalnızca `api.anthropic.com` adresine istek atar.
-- Linux ve Windows'ta çalışır. macOS'ta Claude Code token'ı Keychain'de tuttuğu için bu dosya yoktur, orada çalışmaz.
+- You must be logged in to Claude Code with a Claude account (Pro/Max). The extension reads the token from `~/.claude/.credentials.json` and only sends requests to `api.anthropic.com`.
+- Works on Linux and Windows. On macOS, Claude Code stores the token in the Keychain instead of that file, so it won't work there.
 
-## Kurulum
+## Install
 
-Repoyu VS Code eklenti klasörüne klonla, sonra VS Code'u yeniden başlat (ya da `Ctrl+Shift+P` → **Developer: Reload Window**).
+Clone the repo into your VS Code extensions folder, then restart VS Code (or `Ctrl+Shift+P` → **Developer: Reload Window**).
 
 **Linux:**
 ```bash
@@ -30,8 +31,8 @@ git clone https://github.com/enesbirlik/claude-usage-statusbar ~/.vscode/extensi
 git clone https://github.com/enesbirlik/claude-usage-statusbar "$env:USERPROFILE\.vscode\extensions\local.claude-usage-0.0.1"
 ```
 
-Güncellemek için o klasörde `git pull`, sonra Reload Window.
+To update, run `git pull` in that folder, then Reload Window.
 
-## Not
+## Note
 
-Kullanılan `api/oauth/usage` endpoint'i Anthropic'in resmi olarak belgelediği bir API değil, değişebilir. Değişirse status bar'da `Claude ?` görünür, üstüne gelince hata yazar.
+The `api/oauth/usage` endpoint is not an officially documented Anthropic API and may change. If it does, the status bar shows `Claude ?`; hover to see the error.
