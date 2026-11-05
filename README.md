@@ -8,7 +8,7 @@ VS Code'un alt çubuğunda (status bar) Claude Code plan kullanımını gösteri
 
 - **5s:** 5 saatlik oturum limiti, **7g:** haftalık limit
 - Üstüne gelince sıfırlanma saatleri, tıklayınca yenileme
-- 3 dakikada bir kendiliğinden yenilenir
+- 5 dakikada bir yenilenir; açık tüm VS Code pencereleri sonucu paylaşır (tek istek), hata gelirse son değer kalır ve bekleme 30 dk’ya kadar uzar
 - %75 üstü soluk sarı, %90 üstü soluk kırmızı yazı
 
 ## Gereksinim
