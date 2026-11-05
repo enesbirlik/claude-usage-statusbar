@@ -30,7 +30,8 @@ function activate(ctx) {
   item.show();
 
   function render(c) {
-    const note = c.err ? `\n⚠ Last refresh failed (${c.err}), will retry` : '';
+    const next = new Date(c.at + Math.min(TTL * 2 ** (c.fails || 0), 30 * 60 * 1000)).toISOString();
+    const note = c.err ? `\n⚠ Last refresh failed (${c.err}), next try ${fmt(next)}` : '';
     if (!c.u) {
       item.text = '$(sparkle) Claude ?';
       item.tooltip = 'Could not fetch usage' + note;
