@@ -7,7 +7,7 @@ const CRED = os.homedir() + '/.claude/.credentials.json';
 // tüm VS Code pencereleri aynı sonucu paylaşır, endpoint'e TTL'de en fazla bir kez gidilir (yoksa 429)
 const CACHE = path.join(os.tmpdir(), 'claude-usage-cache.json');
 const TTL = 5 * 60 * 1000;
-const fmt = iso => new Date(iso).toLocaleString('tr-TR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+const fmt = iso => new Date(iso).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
 
 const readCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch { return {}; } };
 const writeCache = c => { try { fs.writeFileSync(CACHE, JSON.stringify(c)); } catch {} };
@@ -30,17 +30,17 @@ function activate(ctx) {
   item.show();
 
   function render(c) {
-    const note = c.err ? `\n⚠ Son yenileme başarısız (${c.err}), tekrar denenecek` : '';
+    const note = c.err ? `\n⚠ Last refresh failed (${c.err}), will retry` : '';
     if (!c.u) {
       item.text = '$(sparkle) Claude ?';
-      item.tooltip = 'Kullanım alınamadı' + note;
+      item.tooltip = 'Could not fetch usage' + note;
       return;
     }
     const s = c.u.five_hour, w = c.u.seven_day;
-    item.text = `$(sparkle) 5s ${Math.round(s.utilization)}% · 7g ${Math.round(w.utilization)}%`;
-    item.tooltip = `Oturum (5 saat): %${s.utilization}, sıfırlanma ${fmt(s.resets_at)}\n` +
-      `Haftalık: %${w.utilization}, sıfırlanma ${fmt(w.resets_at)}\n` +
-      `Güncellendi: ${fmt(c.okAt)}${note}\nTıkla: yenile`;
+    item.text = `$(sparkle) 5h ${Math.round(s.utilization)}% · 7d ${Math.round(w.utilization)}%`;
+    item.tooltip = `Session (5h): ${s.utilization}%, resets ${fmt(s.resets_at)}\n` +
+      `Weekly: ${w.utilization}%, resets ${fmt(w.resets_at)}\n` +
+      `Updated: ${fmt(c.okAt)}${note}\nClick to refresh`;
     const max = Math.max(s.utilization, w.utilization);
     // soluk yazı rengi, arka plan boyanmaz
     item.color = max >= 90 ? '#c08a8a' : max >= 75 ? '#bfae7f' : undefined;

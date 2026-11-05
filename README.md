@@ -3,10 +3,10 @@
 Shows your Claude Code plan usage in the VS Code status bar:
 
 ```
-✨ 5s 4% · 7g 82%
+✨ 5h 4% · 7d 82%
 ```
 
-- **5s:** 5-hour session limit, **7g:** weekly limit
+- **5h:** 5-hour session limit, **7d:** weekly limit
 - Hover for reset times, click to refresh
 - Refreshes every 5 minutes; all open VS Code windows share one result (a single request), so the endpoint isn't hit once per window
 - On errors the last good value stays visible and the retry interval backs off up to 30 minutes

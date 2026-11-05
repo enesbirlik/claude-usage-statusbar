@@ -5,5 +5,5 @@
   "engines": { "vscode": "^1.80.0" },
   "main": "extension.js",
   "activationEvents": ["onStartupFinished"],
-  "contributes": { "commands": [{ "command": "claudeUsage.refresh", "title": "Claude Usage: Yenile" }] }
+  "contributes": { "commands": [{ "command": "claudeUsage.refresh", "title": "Claude Usage: Refresh" }] }
 }
